@@ -9,7 +9,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get('/productList', (request,response) => {
-    db.find((err,result) => {
+    db.find({}, '-_id', (err,result) => {
         if(err){
             console.log('Error occured in backend');
             return err
