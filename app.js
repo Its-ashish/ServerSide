@@ -9,7 +9,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get('/productList', (request,response) => {
-    db.find({}, '-_id', (err,result) => {
+    db.ProductList.find({}, '-_id', (err,result) => {
         if(err){
             console.log('Error occured in backend');
             return err
@@ -19,6 +19,22 @@ app.get('/productList', (request,response) => {
         }
     });
 });
+
+app.post('/sign-up', (request, response) => {
+    var newUser = new db.SignupUser();
+    newUser.firstName = request.body.firstName;
+    newUser.lastName = request.body.lastName;
+    newUser.mailId = request.body.mailId;
+    newUser.password = request.body.password;
+    newUser.save((err, result) => {
+        if(err){
+            response.send("Error Occured in backend", err)
+        } else{
+            response.send({"returnVal":'User Registered Successfully!'});
+        }
+    })
+});
+
 
 app.listen(PORT, ()=> {
     console.log('Server started at port', PORT)

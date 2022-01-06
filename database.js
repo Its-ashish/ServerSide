@@ -17,9 +17,15 @@ var productListSchema = new Schema({
         rate:Number,
         count:Number
     }
-})
+});
+
+var signupUser = new Schema({
+    firstName: String,
+    lastName: String,
+    mailId: String,
+    password: String,
+});
 
 //creating model
-module.exports = mongoose.model('ProductList', productListSchema)
-
-
+module.exports.ProductList = mongoose.model('ProductList', productListSchema)
+module.exports.SignupUser = mongoose.model('SignupUser', signupUser);
