@@ -22,7 +22,7 @@ var productListSchema = new Schema({
 var signupUser = new Schema({
     firstName: String,
     lastName: String,
-    mailId: String,
+    mailId: {type: String, unique: true},
     password: String,
 });
 
