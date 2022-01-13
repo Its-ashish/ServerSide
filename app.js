@@ -7,6 +7,8 @@ const bcrypt = require('bcrypt');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+const expirationTime = '2h'
+
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -23,7 +25,7 @@ app.get('/productList', (request,response) => {
 });
 
 app.post('/sign-up', async (request, response) => {
-    const {firstName,lastName,  mailId, password} = request.body;
+    const {firstName, lastName, mailId, password} = request.body;
     const alreadyExistingUser = await db.SignupUser.findOne({mailId});
     if(alreadyExistingUser){
         return response.status(409).json('Already existing User. Please login!')
@@ -42,9 +44,9 @@ app.post('/sign-up', async (request, response) => {
             const token = jwt.sign(
                 {mailId: mailId},
                 'RANDOM_TOKEN_SECRET',
-                {expiresIn: '2h'}
+                {expiresIn: expirationTime}
             )
-            response.status(200).send({"returnVal":'User Registered Successfully!', token: token});
+            response.status(200).send({"returnVal":'User Registered Successfully!', token: token, expiresIn: expirationTime});
         }
     })
 });
@@ -55,9 +57,9 @@ app.post('/login', async(request, response) => {
         const token = jwt.sign(
             {mailId: request.body.username},
             'RANDOM_TOKEN_SECRET',
-            {expiresIn: '2h'}
+            {expiresIn: expirationTime}
         )
-       return response.status(200).send({message: "Success", token: token})
+       return response.status(200).send({message: "Success", token: token, expiresIn: expirationTime})
     } if(!loggedInUser){
        return response.status(404).json("User Not Found")
     }else{
