@@ -4,15 +4,17 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const { request } = require('express');
+const auth = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-const expirationTime = '2h'
+const expirationTime = '60s'
 
 app.use(cors());
 app.use(bodyParser.json());
 
-app.get('/productList', (request,response) => {
+app.get('/productList', auth, (request,response) => {
     db.ProductList.find({}, '-_id', (err,result) => {
         if(err){
             console.log('Error occured in backend');
@@ -24,7 +26,7 @@ app.get('/productList', (request,response) => {
     });
 });
 
-app.post('/sign-up', async (request, response) => {
+app.post('/sign-up',async (request, response) => {
     const {firstName, lastName, mailId, password} = request.body;
     const alreadyExistingUser = await db.SignupUser.findOne({mailId});
     if(alreadyExistingUser){
@@ -51,7 +53,7 @@ app.post('/sign-up', async (request, response) => {
     })
 });
 
-app.post('/login', async(request, response) => {
+app.post('/login' ,async(request, response) => {
     const loggedInUser = await db.SignupUser.findOne({mailId: request.body.username});
     if(loggedInUser && await bcrypt.compare(request.body.password, loggedInUser?.password)){
         const token = jwt.sign(
