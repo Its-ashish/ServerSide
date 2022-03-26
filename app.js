@@ -6,7 +6,9 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { request } = require('express');
 const auth = require('./middleware/auth');
+const uploadImage = require('./middleware/imageUploadMiddleware.js')
 const app = express();
+
 const PORT = process.env.PORT || 4000;
 
 const expirationTime = '60s'
@@ -67,6 +69,10 @@ app.post('/login' ,async(request, response) => {
     }else{
         response.status(400).json("Invalid Credentials")
     }
+})
+
+app.post('/uploadImage', uploadImage.upload.single('file'), (request, response,next) => {
+    console.log(request.body, request.file, request);
 })
 
 
