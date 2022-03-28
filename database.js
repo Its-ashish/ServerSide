@@ -31,7 +31,7 @@ var avatar = new Schema({
     size: {type: Number},
     type: {type: String},
     imageUrl:{type: String},
-    mailId: {type: String, unique: true}
+    email: {type: String, unique: true}
 })
 
 var registereduser = new Schema({

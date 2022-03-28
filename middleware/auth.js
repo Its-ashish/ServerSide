@@ -1,3 +1,4 @@
+const { request } = require('express');
 const jwt = require('jsonwebtoken');
 
 module.exports = (request, response, next) => {
@@ -8,6 +9,7 @@ module.exports = (request, response, next) => {
     if(request.body.username && decodedToken.mailId !== request.body.username){
         throw "Invalid UserID"
     }else {
+        request.email = decodedToken.mailId
         next();
     }
 

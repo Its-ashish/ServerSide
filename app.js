@@ -11,7 +11,7 @@ const app = express();
 
 const PORT = process.env.PORT || 4000;
 
-const expirationTime = '60s'
+const expirationTime = '600000000000s'
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -71,8 +71,33 @@ app.post('/login' ,async(request, response) => {
     }
 })
 
-app.post('/uploadImage', uploadImage.upload.single('file'), (request, response,next) => {
-    console.log(request.body, request.file, request);
+app.post('/uploadImage', auth, uploadImage.upload.single('file'), async (request, response,next) => {
+    const url = request.protocol + '//:' + request.get('host')
+    if(!request.body || !request.file){
+        response.status(400).send("Null Body")
+    }else{
+        const userData = {
+            name: request.file.originalname,
+            size: request.file.size,
+            type:request.file.mimetype,
+            imageUrl: url + '/upload/' + request.file.filename,
+            email: request.email
+        }
+        const userPresent = await db.Avatar.findOneAndUpdate({email: request.email}, userData); 
+        console.log(userPresent, 'userPresent')
+        if(!userPresent){
+            const userImage = new db.Avatar(userData)
+            userImage.save((err, res) => {
+                if(err){
+                    response.status(404).send("Image Not Uploaded");
+                }else{
+                    response.status(200).json("Image Uploaded");
+                }
+            })
+        }else{
+            response.status(200).send("Image Updated Successfully")
+        }
+    }
 })
 
 
