@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { request } = require('express');
 const auth = require('./middleware/auth');
 const uploadImage = require('./middleware/imageUploadMiddleware.js')
 const app = express();
@@ -22,7 +21,6 @@ app.get('/productList', auth, (request,response) => {
             console.log('Error occured in backend');
             return err
         }else{
-            console.log('Data sent');
             response.json(result);
         }
     });
@@ -72,7 +70,7 @@ app.post('/login' ,async(request, response) => {
 })
 
 app.post('/uploadImage', auth, uploadImage.upload.single('file'), async (request, response,next) => {
-    const url = request.protocol + '//:' + request.get('host')
+    const url = 'http://' + request.get('host')
     if(!request.body || !request.file){
         response.status(400).send("Null Body")
     }else{
@@ -80,25 +78,43 @@ app.post('/uploadImage', auth, uploadImage.upload.single('file'), async (request
             name: request.file.originalname,
             size: request.file.size,
             type:request.file.mimetype,
-            imageUrl: url + '/upload/' + request.file.filename,
+            imageUrl:url + '/fetchImage/' + request.file.filename,
             email: request.email
         }
         const userPresent = await db.Avatar.findOneAndUpdate({email: request.email}, userData); 
-        console.log(userPresent, 'userPresent')
         if(!userPresent){
             const userImage = new db.Avatar(userData)
             userImage.save((err, res) => {
                 if(err){
                     response.status(404).send("Image Not Uploaded");
                 }else{
-                    response.status(200).json("Image Uploaded");
+                    response.status(201).json({
+                        Avatar: {
+                            ...res._doc
+                        }
+                    });
                 }
             })
         }else{
             response.status(200).send("Image Updated Successfully")
         }
     }
-})
+});
+
+app.use('/fetchImage', express.static('fetchImage'),(request, response) => {
+    db.Avatar.find({},'-__v -_id', (err, data) => {
+        if(err){
+            console.log(err);
+            response.status(400).json(err);
+        }else{
+            if(data){
+                response.status(200).json(data[0]);
+            }else{
+                response.status(404).json("No Image Uploaded")
+            }
+        }
+    })
+});
 
 
 app.listen(PORT, ()=> {
