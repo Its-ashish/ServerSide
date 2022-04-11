@@ -14,6 +14,8 @@ const expirationTime = '600000000000s'
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use('/fetchImage', express.static('fetchImage'));
+
 
 app.get('/productList', auth, (request,response) => {
     db.ProductList.find({}, '-_id', (err,result) => {
@@ -101,8 +103,9 @@ app.post('/uploadImage', auth, uploadImage.upload.single('file'), async (request
     }
 });
 
-app.use('/fetchImage', express.static('fetchImage'),(request, response) => {
-    db.Avatar.find({},'-__v -_id', (err, data) => {
+
+app.get('/fetchImage', auth, (request,response) => {
+    db.Avatar.find({email: request.email},'-__v -_id', (err, data) => {
         if(err){
             console.log(err);
             response.status(400).json(err);
