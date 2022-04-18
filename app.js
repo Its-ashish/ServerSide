@@ -104,7 +104,7 @@ app.post('/uploadImage', auth, uploadImage.upload.single('file'), async (request
 });
 
 
-app.get('/fetchImage', auth, (request,response) => {
+app.get('/retriveImage', auth, (request,response) => {
     db.Avatar.find({email: request.email},'-__v -_id', (err, data) => {
         if(err){
             console.log(err);
